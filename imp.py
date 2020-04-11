@@ -42,18 +42,20 @@ palette = [
 #=====================================================
 
 def nextSong(button=None):
+    global current_song, previous_songs, next_songs, GO_NEXT
     GO_NEXT = True
-    previous_songs.append(current_song)
     p.kill()
+    previous_songs.append(current_song)
     if len(next_songs) > 0:
         current_song = next_songs.pop()
     else:
         current_song = random.choice(songs)
 
 def previousSong(button=None):
+    global current_song, previous_songs, next_songs, GO_BACK
     GO_BACK = True
-    next_songs.append(current_song)
     p.kill()
+    next_songs.append(current_song)
     try:
         current_song = previous_songs.pop()
     except IndexError:
@@ -91,13 +93,14 @@ def loopSong(button=None):
         showMessage("loop_on", "Loop on!", message_timeout, loop, info)
     else:
         subprocess.getoutput('echo \'{ "command": ["set_property", "loop-file", false] }\' | socat - ' + socket_path)
-        showMessage("loop_on", "Loop on!", message_timeout, loop, info)
+        showMessage("loop_off", "Loop off!", message_timeout, loop, info)
 
 def randomPage(button=None):
     p.kill()
     raise StopIteration()
 
 def changePageMenu(button=None):
+    global page, CHANGE_PAGE
     edit = urwid.Edit(u"Enter the page number\n", edit_text='', align='center')
     temp = InputBox(edit)
     p.kill()
@@ -116,7 +119,7 @@ def pause(button=None):
     j = json.loads(a) #json loads
     if j['data'] == False:
         subprocess.getoutput('echo \'{"command": ["cycle", "pause"] }\' | socat - ' + socket_path)
-    showMessage("paused", "Paused!", message_timeout, loop, info)
+        showMessage("paused", "Paused!", message_timeout, loop, info)
     else:
         subprocess.getoutput('echo \'{"command": ["cycle", "pause"] }\' | socat - ' + socket_path)
         showMessage("started", "Started!", message_timeout, loop, info)
@@ -332,6 +335,7 @@ while True:
     next_songs = deque()
     current_song = random.choice(songs)
     try:
+        
         while len(songs) > 0:
             info = {}
             temp_dir = tempfile.mkdtemp()
@@ -375,5 +379,6 @@ while True:
                 songs.remove(current_song)
             except ValueError:
                 pass
+            
     except StopIteration:
         pass
